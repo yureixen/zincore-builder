@@ -63,7 +63,7 @@ jobs:
       - name: Setup Environment
         run: bash scripts/setup.sh
 
-      # ── 5. Apply patches (variant-aware) ──────────────────────
+      # ── 5. Apply patches ──────────────────────────────────────
       - name: Apply Patches
         env:
           VARIANT: ${{ matrix.variant }}
@@ -84,7 +84,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  # ── Release job (runs after both builds succeed) ──────────────
+  # ── Release job ───────────────────────────────────────────────
   release:
     name: Create Release
     needs: build
@@ -115,23 +115,6 @@ jobs:
           draft: false
           prerelease: false
           body: |
-            ## Sweet Kernel for Redmi Note 10 Pro (sweet/sweetin)
-
-            **Kernel:** 4.14
-            **Source:** [yurixen/android_kernel_xiaomi_sm6150 @ sixteen-qpr2](https://github.com/yurixen/android_kernel_xiaomi_sm6150/tree/sixteen-qpr2)
-            **Compiler:** LineageOS Clang r416183b
-
-            ### Variants
-            | Zip | Description |
-            |-----|-------------|
-            | `sweet-kernel-stock-*.zip` | Stock — device patches only |
-            | `sweet-kernel-ksu-*.zip` | ReSukiSU + SuSFS + device patches |
-
-            ### Flash Instructions
-            1. Boot into custom recovery (TWRP / OrangeFox)
-            2. Flash the zip
-            3. Reboot
-
             > [!CAUTION]
             > Always backup your boot image before flashing!
           files: artifacts/**/*.zip
