@@ -1,9 +1,5 @@
 #!/bin/bash
-# ════════════════════════════════════════════════════════════════
-#  compile.sh — Kernel Compilation + AnyKernel3 Packaging
-#  Compiler : LineageOS Clang r416183b + GCC 4.9 (compat)
-#  Target   : Image.gz-dtb + dtbo.img (sweet requires both)
-# ════════════════════════════════════════════════════════════════
+
 set -e
 
 echo ""
@@ -13,14 +9,14 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 
 cd "$KERNEL_DIR"
 
-# ── PATH setup ────────────────────────────────────────────────
+# PATH setup
 export PATH="${CLANG_DIR}/bin:${GCC64_DIR}/bin:${GCC32_DIR}/bin:/usr/bin:$PATH"
 export KBUILD_BUILD_USER="$KBUILD_BUILD_USER"
 export KBUILD_BUILD_HOST="$KBUILD_BUILD_HOST"
 
 JOBS=$(nproc --all)
 
-# ── Make arguments ────────────────────────────────────────────
+# Make arguments
 MAKE_ARGS=(
     ARCH=arm64
     SUBARCH=arm64
@@ -49,13 +45,13 @@ echo "  LLD    : $(ld.lld --version | head -1)"
 echo "  Jobs   : $JOBS"
 echo "  Out    : $KERNEL_OUT"
 
-# ── Step 1: defconfig ─────────────────────────────────────────
+# defconfig
 echo ""
 echo "→ [1/3] Generating defconfig..."
 make -j"$JOBS" O="$KERNEL_OUT" "${MAKE_ARGS[@]}" "$KERNEL_DEFCONFIG"
 echo "✓ Defconfig generated"
 
-# ── Step 2: compile ───────────────────────────────────────────
+# compile
 echo ""
 echo "→ [2/3] Compiling kernel (this will take a while)..."
 START=$(date +%s)
@@ -70,7 +66,7 @@ ELAPSED=$(( END - START ))
 echo ""
 echo "  Build time: $(( ELAPSED / 60 ))m $(( ELAPSED % 60 ))s"
 
-# ── Verify output ─────────────────────────────────────────────
+# Verify output
 IMAGE="$KERNEL_OUT/arch/arm64/boot/Image.gz-dtb"
 DTBO="$KERNEL_OUT/arch/arm64/boot/dtbo.img"
 
@@ -88,7 +84,7 @@ echo "✓ Kernel compiled successfully"
 echo "  Image.gz-dtb : $(du -h "$IMAGE" | cut -f1)"
 [ -f "$DTBO" ] && echo "  dtbo.img     : $(du -h "$DTBO" | cut -f1)"
 
-# ── Step 3: AnyKernel3 packaging ──────────────────────────────
+# AnyKernel3 packaging
 echo ""
 echo "→ [3/3] Packaging AnyKernel3 zip..."
 cd "$AK3_DIR"
