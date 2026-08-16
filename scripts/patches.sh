@@ -1,10 +1,5 @@
 #!/bin/bash
-# ════════════════════════════════════════════════════════════════
-#  patches.sh — Device patches + ReSukiSU/SuSFS (if ksu variant)
-#
-#  VARIANT=stock → only device patches
-#  VARIANT=ksu   → device patches + SELinux export + ReSukiSU + SuSFS
-# ════════════════════════════════════════════════════════════════
+
 set -e
 
 cd "$KERNEL_DIR"
@@ -15,7 +10,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo " [patches] Variant: $VARIANT"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# ── Patch helper ──────────────────────────────────────────────
+# Patch helper
 apply_patch_url() {
     local url="$1"
     local name
@@ -31,7 +26,7 @@ apply_patch_url() {
     fi
 }
 
-# ── 1. LN8K charging IC patches (sweet-specific) ─────────────
+# LN8K charging IC patches
 echo ""
 echo "→ [1] Applying LN8K charging IC patches..."
 XIAOMI_SM6150="https://github.com/crdroidandroid/android_kernel_xiaomi_sm6150/commit"
@@ -50,7 +45,7 @@ apply_patch_url "${TBYOOL}/1a17a6fbbf59d901c4b3aec66c06a1c96cd89c7e.patch"
 echo "CONFIG_CHARGER_LN8000=y" >> "$DEFCONFIG"
 echo "✓ LN8K patches done"
 
-# ── 2. DTBO patches ───────────────────────────────────────────
+# DTBO patches
 echo ""
 echo "→ [2] Applying DTBO patches..."
 XIAOMI_DTBO="https://github.com/xiaomi-sm6150/android_kernel_xiaomi_sm6150/commit"
@@ -62,7 +57,7 @@ apply_patch_url "${XIAOMI_DTBO}/2628183db0d96be8dae38a21f2b09cb10978f423.patch"
 apply_patch_url "${XIAOMI_DTBO}/31f4577af3f8255ae503a5b30d8f68906edde85f.patch"
 echo "✓ DTBO patches done"
 
-# ── 3. LTO + KPATCH ───────────────────────────────────────────
+# LTO + KPATCH
 echo ""
 echo "→ [3] Applying LTO + KPATCH patches..."
 LS_PATCHES="https://github.com/TheSillyOk/kernel_ls_patches/raw/refs/heads/master"
@@ -75,9 +70,7 @@ CONFIG_THINLTO=y
 EOF
 echo "✓ LTO + KPATCH done"
 
-# ── 4. QCA WiFi driver enum type fix ──────────────────────────
-# A_ERROR/A_OK (A_STATUS enum) returned from QDF_STATUS functions.
-# Newer Clang treats this as error. Fix: map to QDF equivalents.
+# QCA WiFi driver enum type fix
 echo ""
 echo "→ [4] Fixing QCA WiFi driver enum type mismatch..."
 QCA_CE_DIR="drivers/staging/qcacld-3.0/../qca-wifi-host-cmn/hif/src/ce"
@@ -91,7 +84,7 @@ else
     echo "  ⚠ QCA CE dir not found, skipping"
 fi
 
-# ── 5. Common defconfig entries ───────────────────────────────
+# Common defconfig entries
 echo ""
 echo "→ [5] Adding common defconfig entries..."
 cat >> "$DEFCONFIG" << 'EOF'
@@ -102,7 +95,7 @@ CONFIG_SECURITY_SELINUX_DEVELOP=y
 EOF
 echo "✓ Common defconfig done"
 
-# ── 6. SELinux static export + ReSukiSU + SuSFS (ksu only) ───
+# SELinux static export + ReSukiSU + SuSFS
 if [[ "$VARIANT" == "ksu" ]]; then
 
     echo ""
