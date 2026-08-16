@@ -1,12 +1,4 @@
-# ════════════════════════════════════════════════════════════════
-#  sweet_kernel-builder — GitHub Actions Workflow
-#  Device  : Redmi Note 10 Pro (sweet/sweetin)
-#  Kernel  : 4.14
-#  Clang   : LineageOS Clang r416183b
-#  Trigger : Manual (workflow_dispatch)
-#  Release : Optional — set release input to 'true'
-# ════════════════════════════════════════════════════════════════
-name: Build Sweet Kernel
+name: sweet-builder
 
 on:
   workflow_dispatch:
@@ -38,18 +30,18 @@ jobs:
       date:      ${{ steps.ts.outputs.DATE }}
 
     steps:
-      # ── 1. Checkout builder repo ──────────────────────────────
+      # Checkout builder repo
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # ── 2. Timestamp ──────────────────────────────────────────
+      # Timestamp
       - name: Timestamp
         id: ts
         run: |
           echo "DATE=$(date +'%Y%m%d')"   >> "$GITHUB_OUTPUT"
           echo "TIME=$(date +'%s')"        >> "$GITHUB_OUTPUT"
 
-      # ── 3. Install dependencies ───────────────────────────────
+      # Install dependencies
       - name: Install Dependencies
         run: |
           sudo apt-get update -qq
@@ -59,32 +51,32 @@ jobs:
             zstd lld python3 patchutils ccache \
             libelf-dev cpio lz4 pahole
 
-      # ── 4. Setup: toolchain + kernel + AnyKernel3 ─────────────
+      # toolchain + kernel + AnyKernel3
       - name: Setup Environment
         run: bash scripts/setup.sh
 
-      # ── 5. Apply patches ──────────────────────────────────────
+      # Apply patches
       - name: Apply Patches
         env:
           VARIANT: ${{ matrix.variant }}
         run: bash scripts/patches.sh
 
-      # ── 6. Compile ────────────────────────────────────────────
+      # Compile
       - name: Compile Kernel
         env:
           VARIANT: ${{ matrix.variant }}
         run: bash scripts/compile.sh
 
-      # ── 7. Upload artifact ────────────────────────────────────
+      # Upload artifact
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sweet-kernel-${{ matrix.variant }}-${{ steps.ts.outputs.DATE }}-${{ steps.ts.outputs.TIME }}
+          name: zincore-sweet-${{ matrix.variant }}-${{ steps.ts.outputs.DATE }}-${{ steps.ts.outputs.TIME }}
           path: ${{ github.workspace }}/AnyKernel3/sweet-kernel-*.zip
           if-no-files-found: error
           retention-days: 7
 
-  # ── Release job ───────────────────────────────────────────────
+  # Release job
   release:
     name: Create Release
     needs: build
