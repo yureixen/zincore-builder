@@ -1,8 +1,5 @@
 #!/bin/bash
-# ════════════════════════════════════════════════════════════════
-#  setup.sh — Toolchain + Kernel Source + AnyKernel3 Setup
-#  Compiler: LineageOS Clang r416183b
-# ════════════════════════════════════════════════════════════════
+
 set -e
 
 BUILDER_ROOT="$GITHUB_WORKSPACE"
@@ -15,7 +12,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 # Load config
 source "$BUILDER_ROOT/config.env"
 
-# ── Export paths ──────────────────────────────────────────────
+# Export paths
 export KERNEL_DIR="$BUILDER_ROOT/kernel"
 export AK3_DIR="$BUILDER_ROOT/AnyKernel3"
 export CLANG_DIR="$BUILDER_ROOT/clang"
@@ -42,7 +39,7 @@ export KERNEL_OUT="$KERNEL_DIR/out"
   echo "KBUILD_BUILD_HOST=$KBUILD_BUILD_HOST"
 } >> "$GITHUB_ENV"
 
-# ── Toolchain: LineageOS Clang r416183b ───────────────────────
+# Toolchain: LineageOS Clang r416183b
 echo ""
 echo "→ Cloning LineageOS Clang r416183b..."
 git clone --depth=1 \
@@ -50,7 +47,7 @@ git clone --depth=1 \
   "$CLANG_DIR" &>/dev/null
 echo "✓ Clang ready: $(${CLANG_DIR}/bin/clang --version | head -1)"
 
-# ── Toolchain: GCC (for compat / as/ld fallback) ─────────────
+# Toolchain: GCC
 echo ""
 echo "→ Cloning GCC64..."
 git clone --depth=1 \
@@ -64,7 +61,7 @@ git clone --depth=1 \
   "$GCC32_DIR" &>/dev/null
 echo "✓ GCC32 ready"
 
-# ── Kernel Source ─────────────────────────────────────────────
+# Kernel Source
 echo ""
 echo "→ Cloning kernel source..."
 echo "  Repo  : $KERNEL_REPO"
@@ -72,7 +69,7 @@ echo "  Branch: $KERNEL_BRANCH"
 git clone --depth=1 -b "$KERNEL_BRANCH" "$KERNEL_REPO" "$KERNEL_DIR" &>/dev/null
 echo "✓ Kernel cloned → $KERNEL_DIR"
 
-# ── AnyKernel3 ───────────────────────────────────────────────
+# AnyKernel3
 echo ""
 echo "→ Cloning AnyKernel3..."
 git clone --depth=1 -b "$AK3_BRANCH" "$AK3_REPO" "$AK3_DIR" &>/dev/null
