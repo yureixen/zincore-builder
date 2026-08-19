@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -e
 
 BUILDER_ROOT="$GITHUB_WORKSPACE"
@@ -7,17 +6,40 @@ BUILDER_ROOT="$GITHUB_WORKSPACE"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo " [setup] Starting environment setup"
+echo " [setup] Target Android version: $ANDROID_VERSION"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # Load config
 source "$BUILDER_ROOT/config.env"
 
+# Resolve Clang branch/tag from Android version
+case "$ANDROID_VERSION" in
+    13)
+        CLANG_BRANCH="android13-qpr3-release"
+        CLANG_TAG="clang-r450784d"
+        ;;
+    14)
+        CLANG_BRANCH="android14-qpr3-release"
+        CLANG_TAG="clang-r487747c"
+        ;;
+    15)
+        CLANG_BRANCH="android15-qpr2-release"
+        CLANG_TAG="clang-r536225"
+        ;;
+    16)
+        CLANG_BRANCH="android16-qpr2-release"
+        CLANG_TAG="clang-r563880c"
+        ;;
+    *)
+        echo "✗ Unknown ANDROID_VERSION: $ANDROID_VERSION (expected 13-16)"
+        exit 1
+        ;;
+esac
+
 # Export paths
 export KERNEL_DIR="$BUILDER_ROOT/kernel"
 export AK3_DIR="$BUILDER_ROOT/AnyKernel3"
 export CLANG_DIR="$BUILDER_ROOT/clang"
-export GCC64_DIR="$BUILDER_ROOT/gcc64"
-export GCC32_DIR="$BUILDER_ROOT/gcc32"
 export KERNEL_OUT="$KERNEL_DIR/out"
 
 # Persist for subsequent steps
@@ -25,41 +47,41 @@ export KERNEL_OUT="$KERNEL_DIR/out"
   echo "KERNEL_DIR=$KERNEL_DIR"
   echo "AK3_DIR=$AK3_DIR"
   echo "CLANG_DIR=$CLANG_DIR"
-  echo "GCC64_DIR=$GCC64_DIR"
-  echo "GCC32_DIR=$GCC32_DIR"
   echo "KERNEL_OUT=$KERNEL_OUT"
   echo "KERNEL_REPO=$KERNEL_REPO"
   echo "KERNEL_BRANCH=$KERNEL_BRANCH"
   echo "KERNEL_DEFCONFIG=$KERNEL_DEFCONFIG"
   echo "KERNEL_VERSION=$KERNEL_VERSION"
-  echo "KERNELSU_BRANCH=$KERNELSU_BRANCH"
   echo "AK3_REPO=$AK3_REPO"
   echo "AK3_BRANCH=$AK3_BRANCH"
+  echo "KSU_SETUP_URL=$KSU_SETUP_URL"
+  echo "KSU_SETUP_ARG=$KSU_SETUP_ARG"
+  echo "SUSFS_HOOK_URL=$SUSFS_HOOK_URL"
+  echo "SUSFS_PATCH_BASE=$SUSFS_PATCH_BASE"
   echo "KBUILD_BUILD_USER=$KBUILD_BUILD_USER"
   echo "KBUILD_BUILD_HOST=$KBUILD_BUILD_HOST"
 } >> "$GITHUB_ENV"
 
-# Toolchain: LineageOS Clang r416183b
+# Toolchain: AOSP mainline Clang
 echo ""
-echo "→ Cloning LineageOS Clang r416183b..."
-git clone --depth=1 \
-  https://github.com/LineageOS/android_prebuilts_clang_kernel_linux-x86_clang-r416183b.git \
-  "$CLANG_DIR" &>/dev/null
+echo "→ Downloading Clang for Android $ANDROID_VERSION..."
+echo "  Branch: $CLANG_BRANCH"
+echo "  Tag   : $CLANG_TAG"
+mkdir -p "$CLANG_DIR"
+
+CLANG_URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/${CLANG_BRANCH}/${CLANG_TAG}.tar.gz"
+curl -LSs "$CLANG_URL" -o /tmp/clang.tar.gz || {
+    echo "✗ Failed to download Clang from $CLANG_URL"
+    exit 1
+}
+tar -xzf /tmp/clang.tar.gz -C "$CLANG_DIR"
+rm -f /tmp/clang.tar.gz
+
+if [ ! -f "$CLANG_DIR/bin/clang" ]; then
+    echo "✗ Clang binary not found after extraction!"
+    exit 1
+fi
 echo "✓ Clang ready: $(${CLANG_DIR}/bin/clang --version | head -1)"
-
-# Toolchain: GCC
-echo ""
-echo "→ Cloning GCC64..."
-git clone --depth=1 \
-  https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9.git \
-  "$GCC64_DIR" &>/dev/null
-echo "✓ GCC64 ready"
-
-echo "→ Cloning GCC32..."
-git clone --depth=1 \
-  https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_arm_arm-linux-androideabi-4.9.git \
-  "$GCC32_DIR" &>/dev/null
-echo "✓ GCC32 ready"
 
 # Kernel Source
 echo ""
