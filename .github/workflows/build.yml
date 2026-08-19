@@ -1,8 +1,18 @@
-name: sweet-builder
+name: Build Zincore-Sweet
 
 on:
   workflow_dispatch:
     inputs:
+      android_version:
+        description: 'Target Android version (selects matching Clang)'
+        required: true
+        type: choice
+        default: '16'
+        options:
+          - '13'
+          - '14'
+          - '15'
+          - '16'
       release:
         description: 'Upload to GitHub Release?'
         required: false
@@ -38,8 +48,8 @@ jobs:
       - name: Timestamp
         id: ts
         run: |
-          echo "DATE=$(date +'%Y%m%d')"   >> "$GITHUB_OUTPUT"
-          echo "TIME=$(date +'%s')"        >> "$GITHUB_OUTPUT"
+          echo "DATE=$(date +'%Y%m%d')" >> "$GITHUB_OUTPUT"
+          echo "TIME=$(date +'%s')"     >> "$GITHUB_OUTPUT"
 
       # Install dependencies
       - name: Install Dependencies
@@ -49,10 +59,13 @@ jobs:
             bc build-essential bison flex zip \
             libc6 curl libstdc++6 git wget libssl-dev \
             zstd lld python3 patchutils ccache \
-            libelf-dev cpio lz4 pahole
+            libelf-dev cpio lz4 pahole \
+            gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi
 
       # toolchain + kernel + AnyKernel3
       - name: Setup Environment
+        env:
+          ANDROID_VERSION: ${{ inputs.android_version }}
         run: bash scripts/setup.sh
 
       # Apply patches
@@ -71,8 +84,8 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: zincore-sweet-${{ matrix.variant }}-${{ steps.ts.outputs.DATE }}-${{ steps.ts.outputs.TIME }}
-          path: ${{ github.workspace }}/AnyKernel3/sweet-kernel-*.zip
+          name: zincore-sweet-${{ matrix.variant == 'ksu' && 'ksu' || 'nsu' }}-${{ steps.ts.outputs.DATE }}-${{ steps.ts.outputs.TIME }}
+          path: ${{ github.workspace }}/AnyKernel3/zincore-sweet-*.zip
           if-no-files-found: error
           retention-days: 7
 
@@ -81,7 +94,7 @@ jobs:
     name: Create Release
     needs: build
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.release == 'true' }}
+    if: ${{ inputs.release == 'true' }}
     permissions:
       contents: write
 
@@ -96,17 +109,18 @@ jobs:
 
       - name: Fancy date
         id: ts
-        run: |
-          echo "FANCYDATE=$(date +'%Y/%m/%d')" >> "$GITHUB_OUTPUT"
+        run: echo "FANCYDATE=$(date +'%Y/%m/%d')" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: kernel-sweet-${{ needs.build.outputs.timestamp }}
-          name: "Sweet Kernel — ${{ steps.ts.outputs.FANCYDATE }}"
+          tag_name: zincore-${{ needs.build.outputs.timestamp }}
+          name: "Zincore Kernel — ${{ steps.ts.outputs.FANCYDATE }}"
           draft: false
           prerelease: false
           body: |
+            See the [README](https://github.com/yureixen/zincore-builder#readme) for variant details, credits, and flashing instructions.
+
             > [!CAUTION]
             > Always backup your boot image before flashing!
           files: artifacts/**/*.zip
