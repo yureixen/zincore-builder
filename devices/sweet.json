@@ -5,6 +5,8 @@
     "defconfig": "sweet_defconfig",
     "kernel_version": "4.14",
     "arch": "arm64",
+    "android_target": "16",
+    "clang_version": "r563880c",
 
     "ak3_repo": "https://github.com/yureixen/AnyKernel3.git",
     "ak3_branch": "sweet",
