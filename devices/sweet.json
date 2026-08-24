@@ -1,0 +1,15 @@
+{
+  "sweet": {
+    "kernel_repo": "https://github.com/yureixen/android_kernel_xiaomi_sm6150.git",
+    "kernel_branch": "sixteen-qpr2",
+    "defconfig": "sweet_defconfig",
+    "kernel_version": "4.14",
+    "arch": "arm64",
+
+    "ak3_repo": "https://github.com/yureixen/AnyKernel3.git",
+    "ak3_branch": "sweet",
+
+    "device_names": ["sweet", "sweetin"],
+    "variants": ["nsu", "ksu"]
+  }
+}
