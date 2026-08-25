@@ -65,15 +65,12 @@ if [ ! -d "$CLANG_DIR/bin" ]; then
 fi
 
 export PATH="${CLANG_DIR}/bin:${PATH}"
-export CC=clang
-export LD=ld.lld
-export AR=llvm-ar
-export NM=llvm-nm
-export OBJCOPY=llvm-objcopy
-export OBJDUMP=llvm-objdump
-export STRIP=llvm-strip
+export LLVM=1
+export LLVM_IAS=1
+
 export CLANG_TRIPLE=aarch64-linux-gnu-
 export CROSS_COMPILE=aarch64-linux-gnu-
+export CROSS_COMPILE_COMPAT=arm-linux-gnueabi-
 export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
 
 echo "→ Toolchain ready: $(clang --version | head -1)"
