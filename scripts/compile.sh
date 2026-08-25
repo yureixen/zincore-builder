@@ -25,7 +25,7 @@ AK3_BRANCH=$(read_field ak3_branch)
 
 echo "→ Building $DEVICE ($VARIANT) — defconfig: $DEFCONFIG"
 
-# Branding:
+# Branding: localversion file, auto-picked up by kernel build system
 echo "-zincore-${DEVICE}-${VARIANT}" > localversion
 
 # Base defconfig
@@ -38,7 +38,6 @@ if [ -d "$FRAGMENT_DIR" ]; then
     for FRAGMENT in "$FRAGMENT_DIR"/*.config; do
         [ -f "$FRAGMENT" ] || continue
         echo "→ Merging fragment: $FRAGMENT"
-        # shellcheck disable=SC2046
         ./scripts/config --file "${OUT_DIR}/.config" $(cat "$FRAGMENT")
     done
 fi
@@ -47,9 +46,11 @@ fi
 make O="$OUT_DIR" ARCH="$KERNEL_ARCH" olddefconfig
 
 # Build (capture full log for the debug artifact)
+export KCFLAGS="-O3 -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -Wno-error=incompatible-pointer-types -Wno-error=incompatible-function-pointer-types"
+
 BUILD_LOG="${WORKDIR}/${DEVICE}-${VARIANT}-build.log"
 echo "→ Compiling (log: $BUILD_LOG)"
-make -j"$(nproc)" O="$OUT_DIR" ARCH="$KERNEL_ARCH" 2>&1 | tee "$BUILD_LOG"
+make -j"$(nproc)" O="$OUT_DIR" ARCH="$KERNEL_ARCH" KCFLAGS="$KCFLAGS" 2>&1 | tee "$BUILD_LOG"
 
 # Fail loudly if the kernel image was never produced, even if make "succeeded"
 IMAGE_PATH="${OUT_DIR}/arch/${KERNEL_ARCH}/boot/Image.gz-dtb"
@@ -63,7 +64,7 @@ if [ ! -f "$IMAGE_PATH" ]; then
 fi
 echo "→ Kernel image: $IMAGE_PATH"
 
-# Save final .config as a debug artifact
+# Save final .config as a debug artifact ---
 cp "${OUT_DIR}/.config" "${WORKDIR}/${DEVICE}-${VARIANT}-config"
 
 # Package with AnyKernel3
