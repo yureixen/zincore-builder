@@ -1,0 +1,108 @@
+name: Build Kernel
+
+on:
+  workflow_dispatch:
+    inputs:
+      device:
+        description: "Device to build"
+        required: true
+        type: choice
+        options:
+          - sweet
+        # Add new device codenames here when a new devices/<name>.json is added.
+      create_release:
+        description: "Create a GitHub Release after build"
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  set-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.gen.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: gen
+        run: |
+          VARIANTS=$(jq -c '.["${{ inputs.device }}"].variants' "devices/${{ inputs.device }}.json")
+          MATRIX=$(echo "$VARIANTS" | jq -c '{include: [.[] | {variant: .}]}')
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: set-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+    steps:
+      - name: Checkout builder
+        uses: actions/checkout@v4
+        with:
+          path: builder
+
+      - name: Set up swap space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 10
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential bc cpio flex bison libssl-dev \
+            libelf-dev dwarves zip curl git python3 rsync
+
+      - name: Clone kernel source
+        run: |
+          KERNEL_REPO=$(python3 -c "import json;print(json.load(open('builder/devices/${{ inputs.device }}.json'))['${{ inputs.device }}']['kernel_repo'])")
+          KERNEL_BRANCH=$(python3 -c "import json;print(json.load(open('builder/devices/${{ inputs.device }}.json'))['${{ inputs.device }}']['kernel_branch'])")
+          git clone --depth 1 -b "$KERNEL_BRANCH" "$KERNEL_REPO" kernel_src
+
+      - name: Stage builder files into kernel source
+        run: |
+          cp -r builder/devices kernel_src/
+          cp -r builder/scripts kernel_src/
+          cp builder/config.env kernel_src/
+
+      - name: Build (${{ inputs.device }} / ${{ matrix.variant }})
+        working-directory: kernel_src
+        run: |
+          set -euo pipefail
+          source config.env
+          source scripts/env.sh "${{ inputs.device }}"
+          bash scripts/patches.sh
+          bash scripts/goodies.sh "${{ inputs.device }}" "${{ matrix.variant }}"
+          bash scripts/compile.sh "${{ inputs.device }}" "${{ matrix.variant }}"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: zincore-${{ inputs.device }}-${{ matrix.variant }}
+          path: |
+            kernel_src/zincore-${{ inputs.device }}-${{ matrix.variant }}-*.zip
+            kernel_src/${{ inputs.device }}-${{ matrix.variant }}-build.log
+            kernel_src/${{ inputs.device }}-${{ matrix.variant }}-config
+          if-no-files-found: error
+
+  release:
+    needs: build
+    if: ${{ inputs.create_release }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release_files
+
+      - name: Flatten artifact folders
+        run: |
+          mkdir -p final
+          find release_files -type f -exec mv {} final/ \;
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.device }}-${{ github.run_id }}
+          name: "zincore ${{ inputs.device }} — run ${{ github.run_id }}"
+          files: final/*
