@@ -10,9 +10,6 @@ add() { echo "$1" >> "$FRAGMENT_FILE"; }
 
 echo "→ Building generic config fragment..."
 
-# Werror
-add "-d CONFIG_CC_WERROR"
-
 # MODVERSIONS: not needed for a monolithic non-modular boot setup on this
 add "-d CONFIG_MODVERSIONS"
 
@@ -22,18 +19,18 @@ add "-d CONFIG_MODVERSIONS"
 case "$LTO_MODE" in
     thin)
         add "-d CONFIG_LTO_NONE"
-        add "-e CONFIG_LTO_CLANG_THIN"
-        add "-d CONFIG_LTO_CLANG_FULL"
+        add "-e CONFIG_LTO_CLANG"
+        add "-e CONFIG_THINLTO"
         ;;
     full)
         add "-d CONFIG_LTO_NONE"
-        add "-d CONFIG_LTO_CLANG_THIN"
-        add "-e CONFIG_LTO_CLANG_FULL"
+        add "-e CONFIG_LTO_CLANG"
+        add "-d CONFIG_THINLTO"
         ;;
     none)
         add "-e CONFIG_LTO_NONE"
-        add "-d CONFIG_LTO_CLANG_THIN"
-        add "-d CONFIG_LTO_CLANG_FULL"
+        add "-d CONFIG_LTO_CLANG"
+        add "-d CONFIG_THINLTO"
         ;;
     *)
         echo "✗ Unknown LTO_MODE '$LTO_MODE' — expected thin|full|none"
