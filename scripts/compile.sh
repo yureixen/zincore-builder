@@ -25,7 +25,7 @@ AK3_BRANCH=$(read_field ak3_branch)
 
 echo "→ Building $DEVICE ($VARIANT) — defconfig: $DEFCONFIG"
 
-# Branding
+# Branding:
 echo "-zincore-${DEVICE}-${VARIANT}" > localversion
 
 # Base defconfig
@@ -38,6 +38,7 @@ if [ -d "$FRAGMENT_DIR" ]; then
     for FRAGMENT in "$FRAGMENT_DIR"/*.config; do
         [ -f "$FRAGMENT" ] || continue
         echo "→ Merging fragment: $FRAGMENT"
+        # shellcheck disable=SC2046
         ./scripts/config --file "${OUT_DIR}/.config" $(cat "$FRAGMENT")
     done
 fi
@@ -71,6 +72,23 @@ rm -rf "$AK3_DIR"
 git clone --depth 1 -b "$AK3_BRANCH" "$AK3_REPO" "$AK3_DIR"
 
 cp "$IMAGE_PATH" "$AK3_DIR/"
+
+# This kernel builds dtbo.img and dtb.img as part of the default `all` target
+DTBO_PATH="${OUT_DIR}/arch/${KERNEL_ARCH}/boot/dtbo.img"
+DTB_IMG_PATH="${OUT_DIR}/arch/${KERNEL_ARCH}/boot/dtb.img"
+
+if [ -f "$DTBO_PATH" ]; then
+    cp "$DTBO_PATH" "$AK3_DIR/dtbo.img"
+    echo "→ dtbo.img included"
+else
+    echo "✗ dtbo.img not found at $DTBO_PATH despite CONFIG_BUILD_ARM64_DT_OVERLAY=y — check $BUILD_LOG"
+    exit 1
+fi
+
+if [ -f "$DTB_IMG_PATH" ]; then
+    cp "$DTB_IMG_PATH" "$AK3_DIR/dtb"
+    echo "→ dtb included (for vendor_boot/vendor_kernel_boot devices, harmless if unused)"
+fi
 
 DATE_TAG=$(date +%Y%m%d-%H%M)
 ZIP_NAME="zincore-${DEVICE}-${VARIANT}-${DATE_TAG}.zip"
