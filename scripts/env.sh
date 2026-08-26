@@ -23,9 +23,18 @@ KERNEL_BRANCH=$(read_field kernel_branch)
 KERNEL_DEFCONFIG=$(read_field defconfig)
 KERNEL_ARCH=$(read_field arch)
 CLANG_VERSION=$(read_field clang_version)
+CLANG_BRANCH=$(read_field clang_branch)
 
 if [ -z "$CLANG_VERSION" ]; then
     echo "✗ No clang_version set in $DEVICE_JSON for device '$DEVICE'"
+    exit 1
+fi
+
+if [ -z "$CLANG_BRANCH" ]; then
+    echo "✗ No clang_branch set in $DEVICE_JSON for device '$DEVICE'"
+    echo "  This must match the exact googlesource release branch this clang_version was published under"
+    echo "  (e.g. android16-qpr2-release for r563880c) — do not guess this, verify against"
+    echo "  https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 first."
     exit 1
 fi
 
@@ -39,32 +48,28 @@ echo "→ Clang:  clang-$CLANG_VERSION"
 CLANG_DIR="$(pwd)/toolchain/clang-${CLANG_VERSION}"
 
 if [ ! -d "$CLANG_DIR/bin" ]; then
-    echo "→ Fetching clang-${CLANG_VERSION} from googlesource..."
-    mkdir -p "$(dirname "$CLANG_DIR")"
-    TMP_CLANG_REPO="$(pwd)/toolchain/.clang-src"
-    rm -rf "$TMP_CLANG_REPO"
+    echo "→ Fetching clang-${CLANG_VERSION} from googlesource (archive)..."
+    mkdir -p "$CLANG_DIR"
+    ARCHIVE_URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/${CLANG_BRANCH}/clang-${CLANG_VERSION}.tar.gz"
 
-    git clone --filter=blob:none --no-checkout --depth 1 \
-        https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 \
-        "$TMP_CLANG_REPO"
-
-    cd "$TMP_CLANG_REPO"
-    git sparse-checkout init --cone
-    git sparse-checkout set "clang-${CLANG_VERSION}"
-    git checkout master 2>/dev/null || git checkout main
-    cd - >/dev/null
-
-    if [ ! -d "$TMP_CLANG_REPO/clang-${CLANG_VERSION}" ]; then
-        echo "✗ clang-${CLANG_VERSION} not found in googlesource prebuilts repo."
-        echo "  Check devices/${DEVICE}.json — clang_version may be wrong/renamed."
+    if ! curl -fsSL "$ARCHIVE_URL" -o "/tmp/clang-${CLANG_VERSION}.tar.gz"; then
+        echo "✗ Could not download $ARCHIVE_URL"
+        echo "  Check that clang-${CLANG_VERSION} exists under refs/heads/main of this repo."
         exit 1
     fi
 
-    mv "$TMP_CLANG_REPO/clang-${CLANG_VERSION}" "$CLANG_DIR"
-    rm -rf "$TMP_CLANG_REPO"
+    tar -xzf "/tmp/clang-${CLANG_VERSION}.tar.gz" -C "$CLANG_DIR"
+    rm -f "/tmp/clang-${CLANG_VERSION}.tar.gz"
+
+    if [ ! -d "$CLANG_DIR/bin" ]; then
+        echo "✗ Extracted archive but $CLANG_DIR/bin is missing — archive layout may differ from expected."
+        exit 1
+    fi
 fi
 
 export PATH="${CLANG_DIR}/bin:${PATH}"
+
+# CRITICAL
 export LLVM=1
 export LLVM_IAS=1
 
