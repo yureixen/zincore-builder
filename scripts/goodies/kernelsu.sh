@@ -61,9 +61,8 @@ fi
 echo "→ Applying SuSFS manual hook patches"
 curl -fsSL "$SUSFS_HOOK_URL" | bash
 
-# Core config fragment (structural — merged into out/.config by compile.sh)
+# Core config fragment
 add "-e CONFIG_KSU"
-add "-e CONFIG_KSU_MANUAL_HOOK"
 add "-e CONFIG_KSU_SUSFS"
 add "-e CONFIG_KSU_SUSFS_SUS_PATH"
 add "-e CONFIG_KSU_SUSFS_SUS_MOUNT"
