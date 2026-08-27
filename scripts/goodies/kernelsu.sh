@@ -62,22 +62,21 @@ echo "→ Applying SuSFS manual hook patches"
 curl -fsSL "$SUSFS_HOOK_URL" | bash
 
 # Core config fragment
-echo "→ Patching static symbol exports required by ReSukiSU (write_op, sel_handle_status_ops)"
-SELINUXFS_C="security/selinux/selinuxfs.c"
-
-if grep -q "^static ssize_t (\*write_op\[\])" "$SELINUXFS_C"; then
-    sed -i 's/^static ssize_t (\*write_op\[\])/ssize_t (*write_op[])/' "$SELINUXFS_C"
-    echo "  write_op: static removed"
-else
-    echo "  write_op: already non-static (or pattern not found), skipping"
-fi
-
-if grep -q "^static const struct file_operations sel_handle_status_ops" "$SELINUXFS_C"; then
-    sed -i 's/^static const struct file_operations sel_handle_status_ops/const struct file_operations sel_handle_status_ops/' "$SELINUXFS_C"
-    echo "  sel_handle_status_ops: static removed"
-else
-    echo "  sel_handle_status_ops: already non-static (or pattern not found), skipping"
-fi
+echo "→ Patching static symbol exports required by ReSukiSU"
+unstatic() {
+    local file="$1" regex="$2"
+    if [ -f "$file" ] && grep -q "static $regex" "$file" 2>/dev/null; then
+        sed -i "s/static $regex/$regex/" "$file"
+        echo "  exported: $regex ($file)"
+    fi
+}
+unstatic "security/selinux/selinuxfs.c" "ssize_t (\*write_op\[\])"
+unstatic "security/selinux/selinuxfs.c" "const struct file_operations sel_handle_status_ops"
+unstatic "security/selinux/selinuxfs.c" "DEFINE_MUTEX(sel_mutex);"
+unstatic "security/selinux/ss/services.c" "struct page \*selinux_status_page;"
+unstatic "security/selinux/ss/services.c" "DEFINE_MUTEX(selinux_status_lock);"
+unstatic "security/selinux/ss/services.c" "DEFINE_RWLOCK(policy_rwlock);"
+unstatic "security/selinux/hooks.c" "struct security_operations selinux_ops"
 
 add "-e CONFIG_KSU"
 add "-e CONFIG_KSU_SUSFS"
