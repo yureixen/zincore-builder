@@ -9,7 +9,6 @@ on:
         type: choice
         options:
           - sweet
-        # Add new device codenames here when a new devices/<name>.json is added.
       create_release:
         description: "Create a GitHub Release after build"
         required: true
@@ -43,7 +42,7 @@ jobs:
           path: builder
 
       - name: Set up swap space
-        uses: pierotofy/set-swap-space@master
+        uses: pierotofy/set-swap-space@fc79b3f67fa8a838184ce84a674ca12238d2c761
         with:
           swap-size-gb: 10
 
