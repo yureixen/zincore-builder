@@ -54,7 +54,7 @@ if [ ! -d "$CLANG_DIR/bin" ]; then
 
     if ! curl -fsSL "$ARCHIVE_URL" -o "/tmp/clang-${CLANG_VERSION}.tar.gz"; then
         echo "✗ Could not download $ARCHIVE_URL"
-        echo "  Check that clang-${CLANG_VERSION} exists under refs/heads/main of this repo."
+        echo "  Check that clang-${CLANG_VERSION} exists under refs/heads/${CLANG_BRANCH} of this repo."
         exit 1
     fi
 
@@ -69,7 +69,7 @@ fi
 
 export PATH="${CLANG_DIR}/bin:${PATH}"
 
-# CRITICAL
+# CRITICAL: this kernel's top-level Makefile assigns CC/LD/AR/etc
 export LLVM=1
 export LLVM_IAS=1
 
