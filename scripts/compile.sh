@@ -46,7 +46,7 @@ fi
 make O="$OUT_DIR" ARCH="$KERNEL_ARCH" olddefconfig
 
 # Build (capture full log for the debug artifact)
-export KCFLAGS="-O3 -march=armv8.2-a+crypto+fp16+dotprod -mcpu=cortex-a76 -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -Wno-error=incompatible-pointer-types -Wno-error=incompatible-function-pointer-types"
+export KCFLAGS="-O2 -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -Wno-error=incompatible-pointer-types -Wno-error=incompatible-function-pointer-types"
 
 BUILD_LOG="${WORKDIR}/${DEVICE}-${VARIANT}-build.log"
 echo "→ Compiling (log: $BUILD_LOG)"
