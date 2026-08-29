@@ -21,7 +21,7 @@ jobs:
     outputs:
       matrix: ${{ steps.gen.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - id: gen
         run: |
@@ -37,12 +37,12 @@ jobs:
       matrix: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
     steps:
       - name: Checkout builder
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           path: builder
 
       - name: Set up swap space
-        uses: pierotofy/set-swap-space@fc79b3f67fa8a838184ce84a674ca12238d2c761
+        uses: pierotofy/set-swap-space@49819abfb41bd9b44fb781159c033dba90353a7c
         with:
           swap-size-gb: 10
 
@@ -75,7 +75,7 @@ jobs:
           bash scripts/compile.sh "${{ inputs.device }}" "${{ matrix.variant }}"
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: zincore-${{ inputs.device }}-${{ matrix.variant }}
           path: |
@@ -88,9 +88,11 @@ jobs:
     needs: build
     if: ${{ inputs.create_release }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Download all build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           path: release_files
 
@@ -100,8 +102,10 @@ jobs:
           find release_files -type f -exec mv {} final/ \;
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65
-        with:
-          tag_name: ${{ inputs.device }}-${{ github.run_id }}
-          name: "zincore ${{ inputs.device }} — run ${{ github.run_id }}"
-          files: final/*
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ inputs.device }}-${{ github.run_id }}" \
+            --repo "${{ github.repository }}" \
+            --title "zincore ${{ inputs.device }} — run ${{ github.run_id }}" \
+            final/*
