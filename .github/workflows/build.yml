@@ -132,8 +132,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          DATE=$(date +'%Y/%m/%d')
           gh release create "${{ inputs.device }}-${{ github.run_id }}" \
             --repo "${{ github.repository }}" \
-            --title "zincore ${{ inputs.device }} — run ${{ github.run_id }}" \
+            --title "zincore-${{ inputs.device }} - ${DATE}" \
             --notes-file release_notes.md \
             final/*
