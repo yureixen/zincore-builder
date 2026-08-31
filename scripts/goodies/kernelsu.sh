@@ -73,9 +73,10 @@ fi
 
 # Manual hook script
 echo "→ Applying SuSFS manual hook patches"
-bash "${SUSFS_SRC}/Patches/susfs_inline_hook_patches.sh"
+bash "${SUSFS_SRC}/Patches/susfs_inline_hook_patches.sh" | tee /tmp/zincore_susfs_hook.log
+grep -o "Current susfs patch version:[0-9.]*" /tmp/zincore_susfs_hook.log | head -1 | sed 's/Current susfs patch version://' > "${WORKDIR}/${DEVICE}-susfs-version.txt" || true
 
-# Core config fragment
+# Core config fragment (structural — merged into out/.config by compile.sh)
 echo "→ Patching static symbol exports required by ReSukiSU"
 unstatic() {
     local file="$1" regex="$2"
