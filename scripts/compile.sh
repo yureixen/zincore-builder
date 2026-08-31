@@ -64,6 +64,10 @@ if [ ! -f "$IMAGE_PATH" ]; then
 fi
 echo "→ Kernel image: $IMAGE_PATH"
 
+if [ "$VARIANT" = "ksu" ]; then
+    grep -o "ReSukiSU version name: [^ ]*" "$BUILD_LOG" | head -1 | sed -E 's/ReSukiSU version name: //; s/-[0-9a-f]{6,8}@ReSukiSU$//' > "${WORKDIR}/${DEVICE}-resukisu-version.txt" || true
+fi
+
 # Save final .config as a debug artifact
 cp "${OUT_DIR}/.config" "${WORKDIR}/${DEVICE}-${VARIANT}-config"
 
