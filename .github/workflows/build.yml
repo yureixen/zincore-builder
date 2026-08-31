@@ -137,4 +137,4 @@ jobs:
             --repo "${{ github.repository }}" \
             --title "zincore-${{ inputs.device }} - ${DATE}" \
             --notes-file release_notes.md \
-            final/*
+            final/*.zip
