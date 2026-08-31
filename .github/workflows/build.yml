@@ -122,7 +122,7 @@ jobs:
             if ls final/*-susfs-version.txt >/dev/null 2>&1; then
               echo "> - SuSFS Version: $(cat final/*-susfs-version.txt)"
             fi
-            echo ">"
+            echo ""
             echo "> [!CAUTION]"
             echo "> - Always back up your boot.img before flashing!"
           } > release_notes.md
