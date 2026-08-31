@@ -82,6 +82,14 @@ jobs:
             kernel_src/zincore-${{ inputs.device }}-${{ matrix.variant }}-*.zip
             kernel_src/${{ inputs.device }}-${{ matrix.variant }}-build.log
             kernel_src/${{ inputs.device }}-${{ matrix.variant }}-config
+          if-no-files-found: error
+
+      - name: Upload KSU version info
+        if: matrix.variant == 'ksu'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: zincore-${{ inputs.device }}-${{ matrix.variant }}-versions
+          path: |
             kernel_src/${{ inputs.device }}-resukisu-version.txt
             kernel_src/${{ inputs.device }}-susfs-version.txt
           if-no-files-found: error
