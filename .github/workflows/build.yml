@@ -82,6 +82,8 @@ jobs:
             kernel_src/zincore-${{ inputs.device }}-${{ matrix.variant }}-*.zip
             kernel_src/${{ inputs.device }}-${{ matrix.variant }}-build.log
             kernel_src/${{ inputs.device }}-${{ matrix.variant }}-config
+            kernel_src/${{ inputs.device }}-resukisu-version.txt
+            kernel_src/${{ inputs.device }}-susfs-version.txt
           if-no-files-found: error
 
   release:
@@ -101,6 +103,23 @@ jobs:
           mkdir -p final
           find release_files -type f -exec mv {} final/ \;
 
+      - name: Compose release notes
+        id: notes
+        run: |
+          {
+            echo "> [!NOTE]"
+            if ls final/*-resukisu-version.txt >/dev/null 2>&1; then
+              echo "> - ReSukiSU Version: $(cat final/*-resukisu-version.txt)"
+            fi
+            if ls final/*-susfs-version.txt >/dev/null 2>&1; then
+              echo "> - SuSFS Version: $(cat final/*-susfs-version.txt)"
+            fi
+            echo ">"
+            echo "> [!CAUTION]"
+            echo "> - Always back up your boot.img before flashing!"
+          } > release_notes.md
+          cat release_notes.md
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -108,4 +127,5 @@ jobs:
           gh release create "${{ inputs.device }}-${{ github.run_id }}" \
             --repo "${{ github.repository }}" \
             --title "zincore ${{ inputs.device }} — run ${{ github.run_id }}" \
+            --notes-file release_notes.md \
             final/*
