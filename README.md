@@ -13,7 +13,7 @@ Monthly releases. New builds are published on the [Releases](../../releases) pag
 
 # Features
 
-- `nsu` — default kernel (no KernelSU / SuSFS)
+- `nsu` — default kernel
 - `ksu` — ReSukiSU + SuSFS
 - ThinLTO
 - Latest AOSP Clang
@@ -53,5 +53,3 @@ Monthly releases. New builds are published on the [Releases](../../releases) pag
 - [aosp-xiaomi](https://github.com/aosp-xiaomi/android_kernel_xiaomi_sm6150) — kernel source
 - [ReSukiSU](https://github.com/ReSukiSU/ReSukiSU) — KernelSU implementation with non-GKI kernels
 - [JackA1ltman](https://github.com/JackA1ltman/NonGKI_Kernel_Build_2nd) — SuSFS inline hook script & SuSFS patch for non-GKI kernels
-
-> Architecture inspired by [riarumoda/perf_neon-builder](https://github.com/riarumoda/perf_neon-builder), [DPR-KernelArchive/KernelActions](https://github.com/DPR-KernelArchive/KernelActions), and [linx3141/CustomRom-KernelBuilder](https://github.com/linx3141/CustomRom-KernelBuilder)
