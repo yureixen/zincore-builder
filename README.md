@@ -27,7 +27,7 @@ Monthly releases. New builds are published on the [Releases](../../releases) pag
 - Redmi Note 10 Pro / Pro Max ([`sweet`](https://www.gsmarena.com/xiaomi_redmi_note_10_pro-10662.php))
 
 **Supported Android versions**
-- 13 – 16
+- Android 13 to Android 16
 
 # Installation
 
@@ -43,3 +43,15 @@ Monthly releases. New builds are published on the [Releases](../../releases) pag
    ```bash
    fastboot flash boot boot.img
    fastboot flash dtbo dtbo.img
+   ```
+3. Reboot:
+   ```bash
+   fastboot reboot
+   ```
+
+# Credits
+- [aosp-xiaomi](https://github.com/aosp-xiaomi/android_kernel_xiaomi_sm6150) — kernel source
+- [ReSukiSU](https://github.com/ReSukiSU/ReSukiSU) — KernelSU implementation with non-GKI kernels
+- [JackA1ltman](https://github.com/JackA1ltman/NonGKI_Kernel_Build_2nd) — SuSFS inline hook script & SuSFS patch for non-GKI kernels
+
+> Architecture inspired by [riarumoda/perf_neon-builder](https://github.com/riarumoda/perf_neon-builder), [DPR-KernelArchive/KernelActions](https://github.com/DPR-KernelArchive/KernelActions), and [linx3141/CustomRom-KernelBuilder](https://github.com/linx3141/CustomRom-KernelBuilder)
