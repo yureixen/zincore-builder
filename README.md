@@ -43,5 +43,5 @@ fastboot reboot
 ```
 **Credits**
 - [aosp-xiaomi](https://github.com/aosp-xiaomi/android_kernel_xiaomi_sm6150) — kernel source
-- [ReSukiSU](https://github.com/ReSukiSU/ReSukiSU) — KernelSU implementation with non-GKI kernels
-- [JackA1ltman](https://github.com/JackA1ltman/NonGKI_Kernel_Build_2nd) — SuSFS inline hook script & SuSFS patch for non-GKI kernels
+- [ReSukiSU](https://github.com/ReSukiSU/ReSukiSU) — KernelSU for non-GKI
+- [JackA1ltman](https://github.com/JackA1ltman/NonGKI_Kernel_Build_2nd) — SuSFS patches
