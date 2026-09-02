@@ -31,7 +31,7 @@ Emergency rebuilds may release if the kernel source or build dependencies change
 
 **Flash**
 1. Reboot to recovery
-2. Flash or Sideload the zip
+2. Flash or sideload the zip
 3. Reboot to system
 4. install [ReSukiSU Manager](https://github.com/ReSukiSU/ReSukiSU/releases) if needed — `ksu` only
 
@@ -41,7 +41,7 @@ fastboot flash boot boot.img
 fastboot flash dtbo dtbo.img
 fastboot reboot
 ```
-**Credits**
+# Credits
 - [aosp-xiaomi](https://github.com/aosp-xiaomi/android_kernel_xiaomi_sm6150) — kernel source
 - [ReSukiSU](https://github.com/ReSukiSU/ReSukiSU) — KernelSU for non-GKI
 - [JackA1ltman](https://github.com/JackA1ltman/NonGKI_Kernel_Build_2nd) — SuSFS patches
