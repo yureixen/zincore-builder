@@ -1,3 +1,7 @@
+# Zincore Builder
+
+GitHub Actions–powered kernel builder
+
 # Disclaimer
 
 ***Your warranty is now void. I am not responsible for bricked devices, dead SD cards, or you getting fired because an alarm failed to work. Please do some research if you have any concerns about features included before flashing it! YOU are choosing to make these modifications, and if you point the finger at me for messing up your device, I will laugh at you.***
@@ -19,7 +23,9 @@ Emergency rebuilds may release if the kernel source or build dependencies change
 # Compatibility
 
 **Supported ROMs**
+- LineageOS
 - PixelOS
+- Infinity X
 
 **Supported Devices**
 - Redmi Note 10 Pro / Pro Max ([`sweet`](https://www.gsmarena.com/xiaomi_redmi_note_10_pro-10662.php))
