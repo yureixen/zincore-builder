@@ -1,6 +1,6 @@
 # Zincore Builder
 
-GitHub Actions–powered kernel builder
+GitHub Actions–powered kernel builder for Non-GKI kernel with KernelSU and SUSFS
 
 # Disclaimer
 
@@ -11,13 +11,13 @@ GitHub Actions–powered kernel builder
 
 Builds are published **monthly**.  
 Check the [Releases](../../releases) page for the latest zips.  
-Emergency rebuilds may release if the kernel source or build dependencies change significantly.
+Emergency rebuilds may publish if the kernel source or build dependencies change significantly.
 
 # Features
 
 | Build | Includes |
 |-------|----------|
-| **nsu** | Default kernel — no root integration |
+| **nsu** | Default kernel |
 | **ksu** | ReSukiSU + SuSFS |
 
 # Compatibility
@@ -36,10 +36,11 @@ Emergency rebuilds may release if the kernel source or build dependencies change
 # Installation
 
 **Flash**
-1. Reboot to recovery
-2. Flash or sideload the zip
-3. Reboot to system
-4. install [ReSukiSU Manager](https://github.com/ReSukiSU/ReSukiSU/releases) if needed — `ksu` only
+1. Backup your current `boot` (and `dtbo` if needed)
+2. Reboot to recovery
+3. Flash or sideload the zip
+4. Reboot to system
+5. Install [ReSukiSU Manager](https://github.com/ReSukiSU/ReSukiSU/releases) if needed — `ksu` only
 
 **Restore previous kernel**
 ```bash
