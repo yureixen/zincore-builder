@@ -1,6 +1,6 @@
 # Zincore Builder
 
-GitHub Actions–powered kernel builder for Non-GKI kernel with KernelSU and SUSFS
+GitHub Actions–powered kernel builder for non-GKI kernel with KernelSU and SuSFS
 
 # Disclaimer
 
@@ -11,7 +11,7 @@ GitHub Actions–powered kernel builder for Non-GKI kernel with KernelSU and SUS
 
 Builds are published **monthly**.  
 Check the [Releases](../../releases) page for the latest zips.  
-Emergency rebuilds may publish if the kernel source or build dependencies change significantly.
+Emergency rebuilds may be published if the kernel source or build dependencies change significantly.
 
 # Features
 
@@ -42,12 +42,13 @@ Emergency rebuilds may publish if the kernel source or build dependencies change
 4. Reboot to system
 5. Install [ReSukiSU Manager](https://github.com/ReSukiSU/ReSukiSU/releases) if needed — `ksu` only
 
-**Restore previous kernel**
+**Restore**
 ```bash
 fastboot flash boot boot.img
 fastboot flash dtbo dtbo.img
 fastboot reboot
 ```
+
 # Credits
 - [aosp-xiaomi](https://github.com/aosp-xiaomi/android_kernel_xiaomi_sm6150) — kernel source
 - [ReSukiSU](https://github.com/ReSukiSU/ReSukiSU) — KernelSU for non-GKI
