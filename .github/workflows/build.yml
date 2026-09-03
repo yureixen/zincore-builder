@@ -78,6 +78,23 @@ jobs:
           bash scripts/goodies.sh "${{ inputs.device }}" "${{ matrix.variant }}"
           bash scripts/compile.sh "${{ inputs.device }}" "${{ matrix.variant }}"
 
+      - name: Package patch rejects (on failure)
+        if: failure()
+        working-directory: kernel_src
+        run: |
+          REJECTS=$(find . -name '*.rej')
+          if [ -n "$REJECTS" ]; then
+            tar -czf ../patch-rejects.tar.gz $REJECTS
+          fi
+
+      - name: Upload patch rejects
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: zincore-${{ inputs.device }}-${{ matrix.variant }}-rejects
+          path: patch-rejects.tar.gz
+          if-no-files-found: ignore
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
