@@ -26,7 +26,7 @@ AK3_BRANCH=$(read_field ak3_branch)
 echo "→ Building $DEVICE ($VARIANT) — defconfig: $DEFCONFIG"
 
 # Branding: localversion file, auto-picked up by kernel build system
-echo "-zincore-${DEVICE}-${VARIANT}" > localversion
+echo "-${VARIANT}-zincore" > localversion
 
 # Base defconfig
 mkdir -p "$OUT_DIR"
