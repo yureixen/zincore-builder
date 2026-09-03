@@ -18,6 +18,7 @@ DEFCONFIG=$(read_field defconfig)
 KERNEL_ARCH=$(read_field arch)
 AK3_REPO=$(read_field ak3_repo)
 AK3_BRANCH=$(read_field ak3_branch)
+KERNEL_NAME=$(read_field kernel_name)
 
 : "${DEFCONFIG:?defconfig missing in $DEVICE_JSON}"
 : "${AK3_REPO:?ak3_repo missing in $DEVICE_JSON}"
@@ -25,12 +26,12 @@ AK3_BRANCH=$(read_field ak3_branch)
 
 echo "→ Building $DEVICE ($VARIANT) — defconfig: $DEFCONFIG"
 
-# Branding: localversion file, auto-picked up by kernel build system
-echo "-${VARIANT}-zincore" > localversion
-
 # Base defconfig
 mkdir -p "$OUT_DIR"
 make O="$OUT_DIR" ARCH="$KERNEL_ARCH" "$DEFCONFIG"
+
+# Full kernel name control from builder
+./scripts/config --file "${OUT_DIR}/.config" --set-str CONFIG_LOCALVERSION "-${KERNEL_NAME}-${VARIANT}-zincore"
 
 # Merge all fragments written by patches.sh / goodies.sh into out/.config
 FRAGMENT_DIR="zincore_fragments"
