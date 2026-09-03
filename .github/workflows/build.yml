@@ -6,9 +6,8 @@ on:
       device:
         description: "Device to build"
         required: true
-        type: choice
-        options:
-          - sweet
+        type: string
+        default: sweet
       create_release:
         description: "Create a GitHub Release after build"
         required: true
@@ -25,7 +24,12 @@ jobs:
 
       - id: gen
         run: |
-          VARIANTS=$(jq -c '.["${{ inputs.device }}"].variants' "devices/${{ inputs.device }}.json")
+          DEVICE_JSON="devices/${{ inputs.device }}.json"
+          if [ ! -f "$DEVICE_JSON" ]; then
+            echo "::error::Device '${{ inputs.device }}' not found. Available: $(ls devices/*.json | xargs -n1 basename | sed 's/\.json//' | tr '\n' ' ')"
+            exit 1
+          fi
+          VARIANTS=$(jq -c ".[\"${{ inputs.device }}\"].variants" "$DEVICE_JSON")
           MATRIX=$(echo "$VARIANTS" | jq -c '{include: [.[] | {variant: .}]}')
           echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
 
