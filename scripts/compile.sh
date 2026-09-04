@@ -23,6 +23,7 @@ KERNEL_NAME=$(read_field kernel_name)
 : "${DEFCONFIG:?defconfig missing in $DEVICE_JSON}"
 : "${AK3_REPO:?ak3_repo missing in $DEVICE_JSON}"
 : "${AK3_BRANCH:?ak3_branch missing in $DEVICE_JSON}"
+: "${KERNEL_NAME:?kernel_name missing in $DEVICE_JSON}"
 
 echo "→ Building $DEVICE ($VARIANT) — defconfig: $DEFCONFIG"
 
@@ -33,7 +34,7 @@ make O="$OUT_DIR" ARCH="$KERNEL_ARCH" "$DEFCONFIG"
 # Full kernel name control from builder
 ./scripts/config --file "${OUT_DIR}/.config" --set-str CONFIG_LOCALVERSION "-${KERNEL_NAME}-${VARIANT}-zincore"
 
-# Generic insurance: disable git-dirty auto-suffix regardless of what any
+# Generic insurance: disable git-dirty auto-suffix
 ./scripts/config --file "${OUT_DIR}/.config" --disable CONFIG_LOCALVERSION_AUTO
 
 # Merge all fragments written by patches.sh / goodies.sh into out/.config
