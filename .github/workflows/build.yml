@@ -22,6 +22,9 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
+      - name: Ensure jq is available
+        run: sudo apt-get update && sudo apt-get install -y jq
+
       - id: gen
         run: |
           DEVICE_JSON="devices/${{ inputs.device }}.json"
@@ -54,7 +57,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential bc cpio flex bison libssl-dev \
-            libelf-dev dwarves zip curl git python3 rsync jq
+            libelf-dev dwarves zip curl git python3 rsync
 
       - name: Clone kernel source
         run: |
