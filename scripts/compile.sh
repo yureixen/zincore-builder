@@ -23,6 +23,7 @@ KERNEL_NAME=$(read_field kernel_name)
 : "${DEFCONFIG:?defconfig missing in $DEVICE_JSON}"
 : "${AK3_REPO:?ak3_repo missing in $DEVICE_JSON}"
 : "${AK3_BRANCH:?ak3_branch missing in $DEVICE_JSON}"
+: "${KERNEL_NAME:?kernel_name missing in $DEVICE_JSON}"
 
 echo "→ Building $DEVICE ($VARIANT) — defconfig: $DEFCONFIG"
 
@@ -32,6 +33,9 @@ make O="$OUT_DIR" ARCH="$KERNEL_ARCH" "$DEFCONFIG"
 
 # Full kernel name control from builder
 ./scripts/config --file "${OUT_DIR}/.config" --set-str CONFIG_LOCALVERSION "-${KERNEL_NAME}-${VARIANT}-zincore"
+
+# Generic insurance: disable git-dirty auto-suffix
+./scripts/config --file "${OUT_DIR}/.config" --disable CONFIG_LOCALVERSION_AUTO
 
 # Merge all fragments written by patches.sh / goodies.sh into out/.config
 FRAGMENT_DIR="zincore_fragments"
@@ -79,22 +83,17 @@ git clone --depth 1 -b "$AK3_BRANCH" "$AK3_REPO" "$AK3_DIR"
 
 cp "$IMAGE_PATH" "$AK3_DIR/"
 
-# This kernel builds dtbo.img and dtb.img as part of the default `all` target
-DTBO_PATH="${OUT_DIR}/arch/${KERNEL_ARCH}/boot/dtbo.img"
-DTB_IMG_PATH="${OUT_DIR}/arch/${KERNEL_ARCH}/boot/dtb.img"
+# Auto-detect + package whatever boot-related artifacts
+BOOT_DIR="${OUT_DIR}/arch/${KERNEL_ARCH}/boot"
 
-if [ -f "$DTBO_PATH" ]; then
-    cp "$DTBO_PATH" "$AK3_DIR/dtbo.img"
-    echo "→ dtbo.img included"
-else
-    echo "✗ dtbo.img not found at $DTBO_PATH despite CONFIG_BUILD_ARM64_DT_OVERLAY=y — check $BUILD_LOG"
-    exit 1
-fi
-
-if [ -f "$DTB_IMG_PATH" ]; then
-    cp "$DTB_IMG_PATH" "$AK3_DIR/dtb"
-    echo "→ dtb included (for vendor_boot/vendor_kernel_boot devices, harmless if unused)"
-fi
+for f in dtbo.img dtb.img; do
+    if [ -f "${BOOT_DIR}/${f}" ]; then
+        cp "${BOOT_DIR}/${f}" "$AK3_DIR/${f%.img}"
+        echo "→ ${f} included (auto-detected)"
+    else
+        echo "→ ${f} not produced by this build, skipping (not an error)"
+    fi
+done
 
 DATE_TAG=$(date +%Y%m%d-%H%M)
 ZIP_NAME="zincore-${DEVICE}-${VARIANT}-${DATE_TAG}.zip"
